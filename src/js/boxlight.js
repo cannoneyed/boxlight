@@ -1,83 +1,75 @@
-module.exports = class Boxlight {
-
-  constructor(imageUrls) {
-    this.initialized = false
-    this.isLoading = true
-    this.images = imageUrls.map(url => ({
-      url: url,
-      data: new Image(),
-      index: 0,
-      loaded: 0,
-    }))
-    this.index = 0
-    this.target = document.getElementById('boxlight')
-    this.loader = document.getElementById('loader')
-
-    this.loadInitialImage()
+module.exports = (imageUrls) => {
+  // Declare closure-scoped variables
+  const state = {
+    isLoading: true,
+    // Set the currentIndex to a random position in the images array
+    currentIndex: Math.floor(Math.random() * imageUrls.length),
   }
 
-  getImage(index) {
-    return this.images[index]
+  // Map the imageUrls to image objects, with Image data holders
+  let images = imageUrls.map(url => ({
+    url,
+    data: new Image(),
+    loaded: 0,
+  }))
+
+  // Define the DOM Element targets
+  const target = document.getElementById('boxlight')
+  const loader = document.getElementById('loader')
+
+  loadInitialImage()
+
+  // Return an object with exposed methods
+  return {
+    prev,
+    next,
   }
 
-  endLoading() {
-    this.loading = false
-    this.loader.style.opacity = 0
+  // Internal methods
+  function setLoadingState(isLoading) {
+    state.isLoading = isLoading
+    loader.style.opacity = isLoading ? 1 : 0
   }
 
-  setLoading() {
-    this.loading = true
-    this.loader.style.opacity = 1
+  function setDisplayImageSource(src) {
+    target.style.backgroundImage = `url(${src})`
+    target.style.opacity = 1
   }
 
-  displayImage(src) {
-    this.target.style.backgroundImage = `url(${src})`
-    this.target.style.opacity = 1
+  function prev() {
+    const prevIndex = getPrevIndex(state.currentIndex)
+    goToImage(prevIndex)
   }
 
-  prev() {
-    if (this.loading) {
+  function next() {
+    const nextIndex = getNextIndex(state.currentIndex)
+    goToImage(nextIndex)
+  }
+
+  function goToImage(index) {
+    // Disable skipping ahead past a loading image, for simplicity's sake
+    if (state.isLoading) {
       return
     }
-    const prevIndex = this.getPrevIndex(this.index)
-    this.goToImage(prevIndex)
-  }
 
-  getPrevIndex(index) {
-    return index === 0 ? this.images.length - 1 : index - 1
-  }
-
-  next() {
-    if (this.loading) {
-      return
-    }
-    const nextIndex = this.getNextIndex(this.index)
-    this.goToImage(nextIndex)
-  }
-
-  getNextIndex(index) {
-    return index === this.images.length - 1 ? 0 : index + 1
-  }
-
-  goToImage(goToIndex) {
-    const image = this.getImage(goToIndex)
+    const image = images[index]
+    // In case the image data is already loaded, simply set the imageSource
     if (image.loaded) {
-      this.index = goToIndex
-      return this.displayImage(image.data.src)
-    } else {
-      this.setLoading()
-      this.loadImage(goToIndex).then(src => {
-        this.loading = false
-        this.index = goToIndex
-        this.endLoading()
-        this.displayImage(src)
-      })
+      state.currentIndex = index
+      return setDisplayImageSource(image.data.src)
     }
+
+    setLoadingState(true)
+    loadImageData(index).then(src => {
+      state.currentIndex = index
+      setLoadingState(false)
+      setDisplayImageSource(src)
+    })
   }
 
-  loadImage(index, shouldLoadNeighbors = true) {
-    return new Promise((resolve) => {
-      const image = this.images[index]
+  function loadImageData(index, shouldLoadNeighbors = true) {
+    return new Promise(resolve => {
+      const image = images[index]
       if (image.loaded) {
         return resolve(image.data.src)
       }
@@ -91,25 +83,32 @@ module.exports = class Boxlight {
 
       // Optimistically load the next and previous images in the set
       if (shouldLoadNeighbors) {
-        this.loadNeighbors(index)
+        loadNeighbors(index)
       }
     })
   }
 
-  loadNeighbors(index) {
-    const prevIndex = this.getPrevIndex(index)
-    const nextIndex = this.getNextIndex(index)
+  function loadNeighbors(index) {
+    const prevIndex = getPrevIndex(index)
+    const nextIndex = getNextIndex(index)
 
-    this.loadImage(prevIndex, false)
-    this.loadImage(nextIndex, false)
+    loadImageData(prevIndex, false)
+    loadImageData(nextIndex, false)
   }
 
-  loadInitialImage() {
-    this.loadImage(0).then(src => {
-      this.initialized = true
-      this.endLoading()
-      this.displayImage(src)
+  function loadInitialImage() {
+    loadImageData(state.currentIndex).then(src => {
+      setLoadingState(false)
+      setDisplayImageSource(src)
     })
   }
 
+  // Helper methods
+  function getPrevIndex(index) {
+    return index === 0 ? images.length - 1 : index - 1
+  }
+
+  function getNextIndex(index) {
+    return index === images.length - 1 ? 0 : index + 1
+  }
 }

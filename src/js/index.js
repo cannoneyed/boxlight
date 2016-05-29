@@ -1,5 +1,5 @@
 const querystring = require('querystring')
-const Boxlight = require('./boxlight')
+const initializeBoxlight = require('./boxlight')
 
 const apiKey = 'bc01c649f92a965db1fb2df48fbd4225'
 const galleryId = '72157669024463295'
@@ -7,13 +7,11 @@ const galleryId = '72157669024463295'
 document.addEventListener('DOMContentLoaded', function() {
   loadGallery(galleryId)
     .then(imageUrls => {
-      const boxlight = new Boxlight(imageUrls)
+      const boxlight = initializeBoxlight(imageUrls)
 
       // Set up our navigation links
-      document.getElementById('prev')
-        .addEventListener('click', boxlight.prev.bind(boxlight))
-      document.getElementById('next')
-        .addEventListener('click', boxlight.next.bind(boxlight))
+      document.getElementById('prev').addEventListener('click', boxlight.prev)
+      document.getElementById('next').addEventListener('click', boxlight.next)
     })
 })
 
