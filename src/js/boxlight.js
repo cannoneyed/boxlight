@@ -2,6 +2,7 @@ module.exports = class Boxlight {
 
   constructor(imageUrls) {
     this.initialized = false
+    this.isLoading = true
     this.images = imageUrls.map(url => ({
       url: url,
       data: new Image(),
@@ -19,16 +20,62 @@ module.exports = class Boxlight {
     return this.images[index]
   }
 
-  hideLoader() {
+  endLoading() {
+    this.loading = false
     this.loader.style.opacity = 0
   }
 
-  setImage(src) {
+  setLoading() {
+    this.loading = true
+    this.loader.style.opacity = 1
+  }
+
+  displayImage(src) {
     this.target.style.backgroundImage = `url(${src})`
     this.target.style.opacity = 1
   }
 
-  loadImage(index) {
+  prev() {
+    if (this.loading) {
+      return
+    }
+    const prevIndex = this.getPrevIndex(this.index)
+    this.goToImage(prevIndex)
+  }
+
+  getPrevIndex(index) {
+    return index === 0 ? this.images.length - 1 : index - 1
+  }
+
+  next() {
+    if (this.loading) {
+      return
+    }
+    const nextIndex = this.getNextIndex(this.index)
+    this.goToImage(nextIndex)
+  }
+
+  getNextIndex(index) {
+    return index === this.images.length - 1 ? 0 : index + 1
+  }
+
+  goToImage(goToIndex) {
+    const image = this.getImage(goToIndex)
+    if (image.loaded) {
+      this.index = goToIndex
+      return this.displayImage(image.data.src)
+    } else {
+      this.setLoading()
+      this.loadImage(goToIndex).then(src => {
+        this.loading = false
+        this.index = goToIndex
+        this.endLoading()
+        this.displayImage(src)
+      })
+    }
+  }
+
+  loadImage(index, shouldLoadNeighbors = true) {
     return new Promise((resolve) => {
       const image = this.images[index]
       if (image.loaded) {
@@ -41,15 +88,27 @@ module.exports = class Boxlight {
         image.loaded = true
         resolve(this.src)
       }
+
+      // Optimistically load the next and previous images in the set
+      if (shouldLoadNeighbors) {
+        this.loadNeighbors(index)
+      }
     })
+  }
+
+  loadNeighbors(index) {
+    const prevIndex = this.getPrevIndex(index)
+    const nextIndex = this.getNextIndex(index)
+
+    this.loadImage(prevIndex, false)
+    this.loadImage(nextIndex, false)
   }
 
   loadInitialImage() {
     this.loadImage(0).then(src => {
       this.initialized = true
-      this.hideLoader()
-      this.setImage(src)
-      console.log('LOADED', src)
+      this.endLoading()
+      this.displayImage(src)
     })
   }
 

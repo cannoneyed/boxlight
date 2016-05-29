@@ -5,38 +5,17 @@ const apiKey = 'bc01c649f92a965db1fb2df48fbd4225'
 const galleryId = '72157669024463295'
 
 document.addEventListener('DOMContentLoaded', function() {
-  // Set up our navigation links
-  document.getElementById('prev').addEventListener('click', goToNext)
-  document.getElementById('next').addEventListener('click', goToPrev)
-
-
   loadGallery(galleryId)
     .then(imageUrls => {
-      const boxlightElement = document.getElementById('boxlight')
-      const loader = document.getElementById('loader')
-
       const boxlight = new Boxlight(imageUrls)
+
+      // Set up our navigation links
+      document.getElementById('prev')
+        .addEventListener('click', boxlight.prev.bind(boxlight))
+      document.getElementById('next')
+        .addEventListener('click', boxlight.next.bind(boxlight))
     })
 })
-
-function goToNext() {
-  console.log('🐸')
-}
-
-function goToPrev() {
-  console.log('🐷')
-}
-
-function hideLoader() {
-  const loader = document.getElementById('loader')
-  loader.style.opacity = 0
-}
-
-function setFullscreenImage(url) {
-  const fullscreen = document.getElementById('fullscreen')
-  fullscreen.style.backgroundImage = `url(${url})`
-  fullscreen.style.opacity = 1
-}
 
 function loadGallery(galleryId) {
   const baseUrl = 'https://api.flickr.com/services/rest'
@@ -54,7 +33,6 @@ function loadGallery(galleryId) {
   return fetch(url)
     .then(response => response.json())
     .then(data => {
-      console.log(data)
       const photos = data.photos
       const imageUrls = photos.photo.map(constructImageUrl)
       return imageUrls
