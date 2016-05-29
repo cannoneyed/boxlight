@@ -1,9 +1,6 @@
 const gulp = require('gulp')
 const sass = require('gulp-sass')
 const rename = require('gulp-rename')
-const cssmin = require('gulp-minify-css')
-const concat = require('gulp-concat')
-const uglify = require('gulp-uglify')
 const scsslint = require('gulp-sass-lint')
 const cache = require('gulp-cached')
 const prefix = require('gulp-autoprefixer')
@@ -41,9 +38,6 @@ gulp.task('scss', function() {
     .pipe(prefix())
     .pipe(rename('bundle.css'))
     .pipe(gulp.dest('dist/css'))
-    // .pipe(reload({stream: true}))
-    // .pipe(cssmin())
-    .pipe(size({ gzip: true, showFiles: true }))
     .pipe(rename({ suffix: '.min' }))
     .pipe(gulp.dest('dist/css'))
 })
@@ -78,7 +72,6 @@ gulp.task('minify-html', function() {
   gulp.src('./*.html')
     .pipe(minifyHTML(opts))
     .pipe(gulp.dest('dist/'))
-    // .pipe(reload({stream: true}))
 })
 
 gulp.task('watch', function() {
