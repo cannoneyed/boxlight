@@ -1,4 +1,5 @@
 const querystring = require('querystring')
+const Boxlight = require('./boxlight')
 
 const apiKey = 'bc01c649f92a965db1fb2df48fbd4225'
 const galleryId = '72157669024463295'
@@ -11,19 +12,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
   loadGallery(galleryId)
     .then(imageUrls => {
-      const initialImageUrl = imageUrls[0]
+      const boxlightElement = document.getElementById('boxlight')
+      const loader = document.getElementById('loader')
 
-      const loadingImage = new Image()
-      loadingImage.src = initialImageUrl
-
-      loadingImage.onload = function() {
-        hideLoader()
-        setFullscreenImage(this.src)
-
-        // fullscreen.style.backgroundColor = 'red'
-        console.log(fullscreen)
-        console.log('HEY!')
-      }
+      const boxlight = new Boxlight(imageUrls)
     })
 })
 
