@@ -7,8 +7,6 @@ const uglify = require('gulp-uglify')
 const scsslint = require('gulp-sass-lint')
 const cache = require('gulp-cached')
 const prefix = require('gulp-autoprefixer')
-const browserSync = require('browser-sync')
-const reload = browserSync.reload
 const minifyHTML = require('gulp-minify-html')
 const size = require('gulp-size')
 const imagemin = require('gulp-imagemin')
@@ -19,6 +17,8 @@ const notify = require('gulp-notify')
 const browserify = require('browserify')
 const babelify = require('babelify')
 const source = require('vinyl-source-stream')
+const serve = require('gulp-serve')
+const urlAdjuster = require('gulp-css-url-adjuster')
 
 gulp.task('scss', function() {
   function onError(err) {
@@ -34,25 +34,21 @@ gulp.task('scss', function() {
   return gulp.src('src/scss/main.scss')
     .pipe(plumber({errorHandler: onError}))
     .pipe(sass())
+    .pipe(urlAdjuster({
+      prependRelative: '/',
+    }))
     .pipe(size({ gzip: true, showFiles: true }))
     .pipe(prefix())
-    .pipe(rename('main.css'))
+    .pipe(rename('bundle.css'))
     .pipe(gulp.dest('dist/css'))
-    .pipe(reload({stream: true}))
-    .pipe(cssmin())
+    // .pipe(reload({stream: true}))
+    // .pipe(cssmin())
     .pipe(size({ gzip: true, showFiles: true }))
     .pipe(rename({ suffix: '.min' }))
     .pipe(gulp.dest('dist/css'))
 })
 
-gulp.task('browser-sync', function() {
-  browserSync({
-    reloadDebounce: 2000,
-    server: {
-      baseDir: 'dist/'
-    }
-  })
-})
+gulp.task('serve', serve('dist'))
 
 gulp.task('deploy', function() {
   return gulp.src('dist/**/*')
@@ -65,12 +61,6 @@ gulp.task('js', function() {
     .bundle()
     .pipe(source('bundle.js'))
     .pipe(gulp.dest('dist/js'))
-  // gulp.src('src/js/index.js')
-  //   .pipe(uglify())
-  //   .pipe(size({ gzip: true, showFiles: true }))
-  //   .pipe(concat('bundle.js'))
-  //   .pipe(gulp.dest('dist/js'))
-  //   .pipe(reload({ stream: true }))
 })
 
 gulp.task('scss-lint', function() {
@@ -88,7 +78,7 @@ gulp.task('minify-html', function() {
   gulp.src('./*.html')
     .pipe(minifyHTML(opts))
     .pipe(gulp.dest('dist/'))
-    .pipe(reload({stream: true}))
+    // .pipe(reload({stream: true}))
 })
 
 gulp.task('watch', function() {
@@ -108,4 +98,5 @@ gulp.task('imgmin', function() {
     .pipe(gulp.dest('dist/img'))
 })
 
-gulp.task('default', ['browser-sync', 'js', 'imgmin', 'minify-html', 'scss', 'watch'])
+
+gulp.task('default', ['js', 'imgmin', 'minify-html', 'scss', 'watch', 'serve'])
