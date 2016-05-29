@@ -1,0 +1,70 @@
+@import "spinkit/folding-cube.scss";
+
+html {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background-color: #2c3e50;
+  padding: 0;
+  margin: 0;
+  color: #fff;
+  font: 14px "Helvetica Neue", Arial, Helvetica, Geneva, sans-serif;
+  line-height: 1.5em;
+  text-align: center;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+
+
+#loader {
+  width: 60px;
+  height: 60px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 60px;
+  right: 0;
+  margin: auto;
+}
+
+#fullscreen {
+  opacity: 0;
+  min-width: 100vh;
+  min-height: 100vh;
+  background: no-repeat center center fixed;
+  background-size: cover;
+  transition: all 0.25s ease-in-out;
+}
+
+#prev {
+  left: 10px;
+  transform: rotateZ(180deg) scale(0.8);
+  &:hover {
+    transform: rotateZ(180deg) scale(1);
+  }
+}
+
+#next {
+  right: 10px;
+  transform: scale(0.8);
+  &:hover {
+    transform: scale(1);
+  }
+}
+
+.navigation-arrow {
+  position: absolute;
+  top: 0;
+  bottom: 0px;
+  width: 28px;
+  height: 42px;
+  margin: auto 0;
+  z-index: 1000;
+  cursor: pointer;
+  padding: 20px 10px;
+  transition: all 0.25s ease-in-out 0s;
+}
