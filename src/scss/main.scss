@@ -48,7 +48,7 @@ body {
   background: no-repeat center center fixed;
   background-size: cover;
   opacity: 0;
-  transition: all 0.25s ease-in-out;
+  transition: opacity 0.25s ease-in-out;
 }
 
 #prev {

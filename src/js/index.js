@@ -6,8 +6,8 @@ const galleryId = '72157669024463295'
 
 document.addEventListener('DOMContentLoaded', function() {
   loadGallery(galleryId)
-    .then(imageUrls => {
-      const boxlight = initializeBoxlight(imageUrls)
+    .then(imageData => {
+      const boxlight = initializeBoxlight(imageData)
 
       // Set up our navigation links
       document.getElementById('prev').addEventListener('click', boxlight.prev)
@@ -32,8 +32,13 @@ function loadGallery(galleryId) {
     .then(response => response.json())
     .then(data => {
       const photos = data.photos
-      const imageUrls = photos.photo.map(constructImageUrl)
-      return imageUrls
+      const imageData = photos.photo.map(imageObj => {
+        return {
+          url: constructImageUrl(imageObj),
+          title: imageObj.title,
+        }
+      })
+      return imageData
     })
 }
 

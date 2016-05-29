@@ -1,20 +1,22 @@
-module.exports = (imageUrls) => {
+module.exports = (imageData) => {
   // Declare closure-scoped variables
   const state = {
     isLoading: true,
     // Set the currentIndex to a random position in the images array
-    currentIndex: Math.floor(Math.random() * imageUrls.length),
+    currentIndex: Math.floor(Math.random() * imageData.length),
   }
 
   // Map the imageUrls to image objects, with Image data holders
-  let images = imageUrls.map(url => ({
+  let images = imageData.map(({ url, title }) => ({
     url,
+    title,
     data: new Image(),
     loaded: 0,
   }))
 
   // Define the DOM Element targets
   const target = document.getElementById('boxlight')
+  const title = document.getElementById('title')
   const loader = document.getElementById('loader')
 
   loadInitialImage()
@@ -31,9 +33,10 @@ module.exports = (imageUrls) => {
     loader.style.opacity = isLoading ? 1 : 0
   }
 
-  function setDisplayImageSource(src) {
-    target.style.backgroundImage = `url(${src})`
+  function showImage(image) {
+    target.style.backgroundImage = `url(${image.src})`
     target.style.opacity = 1
+    title.innerHTML = image.title
   }
 
   function prev() {
@@ -56,14 +59,14 @@ module.exports = (imageUrls) => {
     // In case the image data is already loaded, simply set the imageSource
     if (image.loaded) {
       state.currentIndex = index
-      return setDisplayImageSource(image.data.src)
+      return showImage(image)
     }
 
     setLoadingState(true)
-    loadImageData(index).then(src => {
+    loadImageData(index).then(image => {
       state.currentIndex = index
       setLoadingState(false)
-      setDisplayImageSource(src)
+      showImage(image)
     })
   }
 
@@ -71,14 +74,15 @@ module.exports = (imageUrls) => {
     return new Promise(resolve => {
       const image = images[index]
       if (image.loaded) {
-        return resolve(image.data.src)
+        return resolve(image)
       }
 
       // Set the source to the url, beginning the load
       image.data.src = image.url
       image.data.onload = function() {
         image.loaded = true
-        resolve(this.src)
+        image.src = this.src
+        resolve(image)
       }
 
       // Optimistically load the next and previous images in the set
@@ -97,9 +101,9 @@ module.exports = (imageUrls) => {
   }
 
   function loadInitialImage() {
-    loadImageData(state.currentIndex).then(src => {
+    loadImageData(state.currentIndex).then(image => {
       setLoadingState(false)
-      setDisplayImageSource(src)
+      showImage(image)
     })
   }
 
