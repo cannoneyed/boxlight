@@ -1,4 +1,3 @@
-const _ = require('lodash')
 const querystring = require('querystring')
 
 const apiKey = 'bc01c649f92a965db1fb2df48fbd4225'
