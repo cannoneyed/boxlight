@@ -1,4 +1,5 @@
 module.exports = (imageData) => {
+
   // Declare closure-scoped variables
   const state = {
     isLoading: true,
@@ -27,18 +28,22 @@ module.exports = (imageData) => {
     next,
   }
 
-  // Internal methods
+  // ------------------------------------- Internal methods
+
+  // Set loading state and hide the loader element
   function setLoadingState(isLoading) {
     state.isLoading = isLoading
     loader.style.opacity = isLoading ? 1 : 0
   }
 
+  // Display an image by setting it as the target's background
   function showImage(image) {
     target.style.backgroundImage = `url(${image.src})`
     target.style.opacity = 1
     title.innerHTML = image.title
   }
 
+  // Controls
   function prev() {
     const prevIndex = getPrevIndex(state.currentIndex)
     goToImage(prevIndex)
@@ -49,6 +54,7 @@ module.exports = (imageData) => {
     goToImage(nextIndex)
   }
 
+  // Navigate to a specific image
   function goToImage(index) {
     // Disable skipping ahead past a loading image, for simplicity's sake
     if (state.isLoading) {
@@ -70,6 +76,7 @@ module.exports = (imageData) => {
     })
   }
 
+  // Load image data
   function loadImageData(index, shouldLoadNeighbors = true) {
     return new Promise(resolve => {
       const image = images[index]
@@ -92,6 +99,7 @@ module.exports = (imageData) => {
     })
   }
 
+  // Optimistically load the previous and next image
   function loadNeighbors(index) {
     const prevIndex = getPrevIndex(index)
     const nextIndex = getNextIndex(index)
